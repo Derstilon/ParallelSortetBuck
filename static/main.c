@@ -1,9 +1,12 @@
 #include <omp.h>
 #include <stdio.h>
-main()
+int main()
 {
     int *table;
     int SIZE_OF_TABLE = 10000;
+    int AMOUNT_OF_THREADS = 4;
+    int SIZE_OF_CHUNKS = SIZE_OF_TABLE / AMOUNT_OF_THREADS;
+    int SIZE_OF_ENDCHUNK = SIZE_OF_TABLE % AMOUNT_OF_THREADS;
 
     /*
      * Kod wykonywany s e k w e n c y j n i e
@@ -12,20 +15,26 @@ main()
     printf(" Liczba wątków: %d \n", omp_get_num_threads());
     printf(" Jestem wątek nr %d \n ", omp_get_thread_num());
     printf("\n");
-/**/
-#pragma omp parallel private(var1, var2) shared(var3)
-    /* Początek
-        o b s z a r u r ó wn ole g ł ego.Tw o r z e ni e g r u py wą t k ów.Okre ś l a n i e
-            z a s i ę gu zmie n nych */
+#pragma omp parallel firstprivate(var1, var2, SIZE_OF_TABLE, AMOUNT_OF_THREADS) shared(table)
     {
-        /* Kod wykonywany r ó wn ole g ł e(p r z e z w s z y s t k i e wą t k i) */
-        printf(" Liczba wą tk ów: %d \n", omp_get_num_threads());
-        printf(" Jestem wą tek nr %d \n", omp_get_thread_num());
-
-    } /* W s z y s t k i e wą t k i s i ę s y n c h r o n i z u j ą */
-    /**/
-    printf("\n ");
-    /* K o n ty n u a cj a s e k w e n c yj n e g o wykonywania kodu */
-    printf(" Liczba wątków: %d \n", omp_get_num_threads());
-    printf(" Jestem wątek nr %d\n", omp_get_thread_num());
+        if (omp_get_thread_num() == AMOUNT_OF_THREADS - 1)
+        {
+            for (int i = 0; i < SIZE_OF_CHUNKS + SIZE_OF_ENDCHUNK; i++)
+            {
+                table[i] = omp_get_thread_num();
+            }
+        }
+        else
+        {
+            for (int i = 0; i < SIZE_OF_CHUNKS; i++)
+            {
+                table[i] = omp_get_thread_num();
+            }
+        }
+    }
+    for (int i = 0; i < SIZE_OF_TABLE; i++)
+    {
+        printf("%d ", table[i]);
+    }
+    printf("\n");
 }
