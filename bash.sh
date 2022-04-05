@@ -2,10 +2,13 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 12
 #SBATCH --time=00:05:00
-#SBATCH --partition=plgrid
+#SBATCH --partition=plgrid-short
 #SBATCH --account=plgyaptide
 
-module add plgrid/tools/openmpi
+module add plgrid/tools/openmp
+
+g++ -Wall static/main_stolen.cpp -o static/main_stolen -fopenmp
+./static/main_stolen
 
 # for (( i=12; i>0; i-- ))
 # do
