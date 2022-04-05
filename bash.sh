@@ -1,15 +1,15 @@
 #!/bin/bash -l
 #SBATCH --nodes 1
 #SBATCH --ntasks 12
-#SBATCH --mem=1K
+#SBATCH --mem=1G
 #SBATCH --time=00:05:00
 #SBATCH --partition=plgrid-short
 #SBATCH --account=plgyaptide
 
 module add plgrid/tools/openmp
 
-gcc -Wall static/generate.c -o static/generate -fopenmp
-./static/generate
+gcc -Wall static/main.c -o static/main -fopenmp
+./static/main
 
 # for (( i=12; i>0; i-- ))
 # do
