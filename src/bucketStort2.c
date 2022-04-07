@@ -2,17 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-int min(int a, int b) {
-    return (a < b) ? a : b;
-}
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 void bucketSort2(int number_of_threads, int array_size, int *array, int *sorted_array, int bucket_size, int number_of_buckets, int bucket_range)
 {
     int BASIC_CHUNK_SIZE = array_size / number_of_threads;
     int *chunks_sizes = malloc(number_of_threads * sizeof(int));
     int i, j, x;
-    for(i = 0; i < number_of_threads; i++)
+    for (i = 0; i < number_of_threads; i++)
     {
         chunks_sizes[i] = BASIC_CHUNK_SIZE;
     }
@@ -28,12 +25,12 @@ void bucketSort2(int number_of_threads, int array_size, int *array, int *sorted_
         bucket_indexes[i] = 0;
     }
 
-    // #pragma omp parallel num_threads(number_of_threads)
-    // {
+// #pragma omp parallel num_threads(number_of_threads)
+// {
 
-    // }
-    #pragma omp for schedule(static, BASIC_CHUNK_SIZE) private(i, x)
-    for (i = omp_get_thread_num() * BASIC_CHUNK_SIZE; i < min(array_size,(omp_get_thread_num() + 1) * BASIC_CHUNK_SIZE); i++)
+// }
+#pragma omp for schedule(static, BASIC_CHUNK_SIZE) private(i, x)
+    for (i = omp_get_thread_num() * BASIC_CHUNK_SIZE; i < min(array_size, (omp_get_thread_num() + 1) * BASIC_CHUNK_SIZE); i++)
     {
         x = array[i];
         int bucket_idx = number_of_buckets - 1;
