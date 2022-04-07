@@ -9,8 +9,8 @@
 module add plgrid/tools/openmp
 
 # gcc -Wall src/populate_array.c -o src/populate_array -fopenmp
-gcc -Wall src/main.c src/populate_array.c src/bucketStort2.c -o src/main -fopenmp
-./src/main
+gcc -Wall src/main.c src/populate_array.c src/bucketStort1.c src/bucketStort2.c src/bucketStort3.c -o src/main.o -fopenmp
+./src/main.o
 
 # for (( i=12; i>0; i-- ))
 # do

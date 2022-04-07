@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void bucketSort2(int number_of_threads, int array_size, int *array, int bucket_size, int number_of_buckets, int bucket_range)
+void bucketSort2(int number_of_threads, int array_size, int *array, int *sorted_array, int bucket_size, int number_of_buckets, int bucket_range)
 {
-    int *sorted_array = malloc(array_size * sizeof(int));
+    sorted_array = malloc(array_size * sizeof(int));
 
     int SIZE_OF_CHUNKS = array_size / number_of_threads;
     int SIZE_OF_ENDCHUNK = array_size % number_of_threads;
