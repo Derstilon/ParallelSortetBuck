@@ -10,22 +10,27 @@ void bucketSort3(int, int, int *, int *, int, int, int);
 
 int main(int argc, char **argv)
 {
-    int variant;
-    if (argc > 1)
-    {
+    int variant, NUMBER_OF_THREADS, ARRAY_SIZE, MAX_NUMBER, NUMBER_OF_RANGES;
+    
+    if (argc > 5) {
         variant = atoi(argv[1]);
-    }
-    else
-    {
+        NUMBER_OF_THREADS = atoi(argv[2]);
+        ARRAY_SIZE = atoi(argv[3]);
+        MAX_NUMBER = atoi(argv[4]);
+        NUMBER_OF_RANGES = atoi(argv[5]);
+    } else {
         variant = 1;
+        NUMBER_OF_THREADS = 4;
+        ARRAY_SIZE = 10000;
+        MAX_NUMBER = 10000;
+        NUMBER_OF_RANGES = 10;
     }
-    int NUMBER_OF_THREADS = 4;
-    int ARRAY_SIZE = 10000;
-    int *array, *sorted_array;
-    int MAX_NUMBER = 10000;
+
     int BUCKET_SIZE = ARRAY_SIZE / 2;
-    int NUMBER_OF_RANGES = 10;
     int BUCKET_RANGE = MAX_NUMBER / NUMBER_OF_RANGES;
+
+    int *array, *sorted_array;
+
     array = malloc(ARRAY_SIZE * sizeof(int));
     populate_array(NUMBER_OF_THREADS, ARRAY_SIZE, array, MAX_NUMBER, 2137);
     switch (variant)
