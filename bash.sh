@@ -1,8 +1,8 @@
 #!/bin/bash -l
 #SBATCH --nodes 1
 #SBATCH --ntasks 12
-#SBATCH --mem=100M
-#SBATCH --time=00:20:00
+#SBATCH --mem=1M
+#SBATCH --time=00:01:30
 #SBATCH --partition=plgrid-short
 #SBATCH --account=plgyaptide
 #SBATCH --output="output.out"
