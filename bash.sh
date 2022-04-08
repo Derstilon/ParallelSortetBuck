@@ -5,22 +5,29 @@
 #SBATCH --time=00:05:00
 #SBATCH --partition=plgrid-short
 #SBATCH --account=plgyaptide
+#SBATCH --output="output.out"
 
 # module add plgrid/tools/openmp
 
-# gcc -Wall src/populate_array.c -o src/populate_array -fopenmp
-gcc -Wall src/main.c src/populate_array.c src/sortChunk.c src/bucketSort1.c src/bucketSort2.c src/bucketSort3.c -o src/main -fopenmp
+SCRATCH_DIRECTORY=/net/scratch/people/${USER}/${SLURM_JOBID}
+mkdir -p ${SCRATCH_DIRECTORY}
+cd ${SCRATCH_DIRECTORY}
+
+cp ${SLURM_SUBMIT_DIR}/src/main.c ${SCRATCH_DIRECTORY}
+cp ${SLURM_SUBMIT_DIR}/src/populate_array.c ${SCRATCH_DIRECTORY}
+cp ${SLURM_SUBMIT_DIR}/src/sortChunk.c ${SCRATCH_DIRECTORY}
+cp ${SLURM_SUBMIT_DIR}/src/bucketSort1.c ${SCRATCH_DIRECTORY}
+cp ${SLURM_SUBMIT_DIR}/src/bucketSort2.c ${SCRATCH_DIRECTORY}
+cp ${SLURM_SUBMIT_DIR}/src/bucketSort3.c ${SCRATCH_DIRECTORY}
+
+
+gcc -Wall main.c populate_array.c sortChunk.c bucketSort1.c bucketSort2.c bucketSort3.c -o main -fopenmp
 # ./src/main 1 4 10000 10000 10
 # ./src/main 2 4 10000 10000 10
-./src/main 3 4 10000 10000 10
+./main 3 4 10000 10000 10
 
-# for (( i=12; i>0; i-- ))
-# do
-#     for (( j=8; j<=8; j+=2 ))
-#     do
-#         for (( k=1; k<=10; k++))
-#         do
-#             mpiexec -n $i python3 main.py $((10**j))
-#         done
-#     done
-# done
+cd ${SLURM_SUBMIT_DIR}
+rm -rf ${SCRATCH_DIRECTORY}
+
+# Finish the script
+exit 0
