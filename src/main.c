@@ -45,7 +45,7 @@ int main(int argc, char **argv)
         bucketSort3(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
         break;
     default:
-        printf("Wrong variant");
+        printf("Wrong variant\n");
     }
     free(array);
     free(sorted_array);
