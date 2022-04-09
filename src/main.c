@@ -1,6 +1,7 @@
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define min(a,b) (a > b ? b : a)
 
 void populate_array(int, int, int *, int, unsigned int);
 
@@ -26,9 +27,8 @@ int main(int argc, char **argv)
         NUMBER_OF_RANGES = 10;
     }
 
-    int BUCKET_SIZE = ARRAY_SIZE / 2;
-    int BUCKET_RANGE = MAX_NUMBER / NUMBER_OF_RANGES;
-
+    int BUCKET_RANGE = (MAX_NUMBER / NUMBER_OF_RANGES) + (MAX_NUMBER % NUMBER_OF_RANGES);
+    int BUCKET_SIZE = min(ARRAY_SIZE, 2*BUCKET_RANGE);
     int *array, *sorted_array;
 
     array = malloc(ARRAY_SIZE * sizeof(int));
