@@ -2,13 +2,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define max(a, b) a > b ? a : b
-#define BUCKET_BOTTOM(i, j) (sorted_array + (i * number_of_ranges + j) * bucket_size)
-#define BUCKET_TOP(i, j) (sorted_array + (i * number_of_ranges + j) * bucket_size + bucket_fullness[i][j])
+#define BUCKET_BOTTOM(i, j) \
+    (sorted_array + (i * number_of_ranges + j) * bucket_size)
+#define BUCKET_TOP(i, j) \
+    (sorted_array + (i * number_of_ranges + j) * bucket_size + bucket_fullness[i][j])
 #define STRINGIFY(x) #x
-#define SCHEDULE_FOR(tasks)     _Pragma(STRINGIFY(omp for schedule(dynamic, max(tasks / amount_of_threads,1)) private(i, j, k)))
-#define SCHEDULE_SINGLE _Pragma("omp single private(i, j, k)")
+#define SCHEDULE_FOR(tasks) \
+    _Pragma(STRINGIFY(omp for schedule(dynamic, max(tasks / amount_of_threads,1)) private(i, j, k)))
+#define SCHEDULE_SINGLE \
+    _Pragma("omp single private(i, j, k)")
 #define SCHEDULE_TIME(tx) \
     SCHEDULE_SINGLE { tx = omp_get_wtime(); }
+#define SCHEDULE_MAIN \
+    _Pragma("omp parallel num_threads(amount_of_threads) shared(bucket_fullness, sorted_array)")
 
 void sortChunk(int *, int);
 
@@ -28,7 +34,7 @@ void bucketSort3(
     int **bucket_fullness = calloc(amount_of_threads, sizeof(int *));
     for (k = 0; k < amount_of_threads; k++)
         bucket_fullness[k] = calloc(number_of_ranges, sizeof(int));
-#pragma omp parallel num_threads(amount_of_threads) shared(bucket_fullness, sorted_array)
+    SCHEDULE_MAIN
     {
 
         /***************** ASSIGN  BUCKETS *****************/
