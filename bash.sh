@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #SBATCH --nodes 1
 #SBATCH --ntasks 12
-#SBATCH --mem=500M
+#SBATCH --mem=1000M
 #SBATCH --time=00:29:99
 #SBATCH --partition=plgrid-short
 #SBATCH --account=plgyaptide
@@ -34,7 +34,7 @@ do
         do
             echo "Variant: $v, Threads: $t, Ranges: $r"
             # ./main $v $t 5000 32767 $r
-            ./main $v $t 400000 524287 $r
+            ./main $v $t 500000 524287 $r
             echo
         done
     done

@@ -5,12 +5,12 @@
 
 #define BUCKET_FULLNESS(th, rg) \
     bucket_fullness[th][rg]
-    
+
 #define BUCKET_POINTER(th, rg) \
     (sorted_array + (th * number_of_ranges + rg) * bucket_size)
 
 #define BUCKET_VALUE(th, rg, offset) \
-    BUCKET_POINTER(th, rg)[offset]
+    (BUCKET_POINTER(th, rg)[offset])
 
 #define BUCKET_TOP(th, rg) \
     BUCKET_VALUE(th, rg, bucket_fullness[th][rg])
@@ -32,7 +32,6 @@
 
 #define SCHEDULE_MAIN \
     _Pragma("omp parallel num_threads(amount_of_threads) shared(bucket_fullness, sorted_array)")
-
 
 void sortChunk(int *, int);
 
@@ -66,7 +65,8 @@ void bucketSort3(
             th = omp_get_thread_num();
             rg = array[el] / bucket_range;
             BUCKET_TOP(th, rg) = array[el];
-            BUCKET_FULLNESS(th, rg)++;
+            BUCKET_FULLNESS(th, rg)
+            ++;
         }
         SCHEDULE_TIME(t1);
 
@@ -78,7 +78,8 @@ void bucketSort3(
                 for (fl = 0; fl < BUCKET_FULLNESS(th, rg); fl++)
                 {
                     BUCKET_TOP(0, rg) = BUCKET_VALUE(th, rg, fl);
-                    BUCKET_FULLNESS(0, rg)++;
+                    BUCKET_FULLNESS(0, rg)
+                    ++;
                 }
         }
         SCHEDULE_TIME(t3);
@@ -99,17 +100,22 @@ void bucketSort3(
                 for (fl = 0; fl < BUCKET_FULLNESS(0, rg); fl++)
                 {
                     BUCKET_TOP(0, 0) = BUCKET_VALUE(0, rg, fl);
-                    BUCKET_FULLNESS(0, 0)++;
+                    BUCKET_FULLNESS(0, 0)
+                    ++;
                 }
         }
         SCHEDULE_TIME(t7);
         SCHEDULE_SINGLE
         {
             printf("\n");
-            printf("Czas przypisania wartości do kubelkow: %e \n", t1 - t0);
-            printf("Czas połączenia kubelkow:              %e \n", t3 - t2);
-            printf("Czas sortowania kubelkow:              %e \n", t5 - t4);
-            printf("Czas połączenia wynikow:               %e \n", t7 - t6);
+            // printf("Czas przypisania wartości do kubelkow: %e \n", t1 - t0);
+            // printf("Czas połączenia kubelkow:              %e \n", t3 - t2);
+            // printf("Czas sortowania kubelkow:              %e \n", t5 - t4);
+            // printf("Czas połączenia wynikow:               %e \n", t7 - t6);
+            printf("%e\n", t1 - t0);
+            printf("%e\n", t3 - t2);
+            printf("%e\n", t5 - t4);
+            printf("%e\n", t7 - t6);
         }
     }
 }

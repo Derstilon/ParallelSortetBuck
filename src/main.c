@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     }
 
     int BUCKET_RANGE = (MAX_NUMBER / NUMBER_OF_RANGES) + ((MAX_NUMBER % NUMBER_OF_RANGES) > 0 ? 1 : 0);
-    int BUCKET_SIZE = ARRAY_SIZE;
+    int BUCKET_SIZE = min(ARRAY_SIZE, (ARRAY_SIZE / NUMBER_OF_RANGES) * 2);
     int *array, *sorted_array;
 
     array = malloc(ARRAY_SIZE * sizeof(int));
