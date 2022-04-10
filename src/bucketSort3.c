@@ -1,20 +1,38 @@
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define max(a, b) a > b ? a : b
-#define BUCKET_BOTTOM(i, j) \
-    (sorted_array + (i * number_of_ranges + j) * bucket_size)
-#define BUCKET_TOP(i, j) \
-    (sorted_array + (i * number_of_ranges + j) * bucket_size + bucket_fullness[i][j])
+#include <string.h>
+
+#define BUCKET_FULLNESS(th, rg) \
+    bucket_fullness[th][rg]
+    
+#define BUCKET_POINTER(th, rg) \
+    (sorted_array + (th * number_of_ranges + rg) * bucket_size)
+
+#define BUCKET_VALUE(th, rg, offset) \
+    BUCKET_POINTER(th, rg)[offset]
+
+#define BUCKET_TOP(th, rg) \
+    BUCKET_VALUE(th, rg, bucket_fullness[th][rg])
+
 #define STRINGIFY(x) #x
-#define SCHEDULE_FOR(tasks) \
-    _Pragma(STRINGIFY(omp for schedule(dynamic, max(tasks / amount_of_threads,1)) private(i, j, k)))
+
+#define SCHEDULE_FOR_PRAGMA(block) \
+    _Pragma(STRINGIFY(omp for schedule(dynamic, block) private(el, th, rg, fl)))
+
+#define SCHEDULE_FOR(var, iterator)                                                        \
+    SCHEDULE_FOR_PRAGMA(var / amount_of_threads + ((var % amount_of_threads) > 0 ? 1 : 0)) \
+    for (iterator = 0; iterator < var; iterator++)
+
 #define SCHEDULE_SINGLE \
-    _Pragma("omp single private(i, j, k)")
+    _Pragma("omp single private(el, th, rg, fl)")
+
 #define SCHEDULE_TIME(tx) \
     SCHEDULE_SINGLE { tx = omp_get_wtime(); }
+
 #define SCHEDULE_MAIN \
     _Pragma("omp parallel num_threads(amount_of_threads) shared(bucket_fullness, sorted_array)")
+
 
 void sortChunk(int *, int);
 
@@ -28,58 +46,60 @@ void bucketSort3(
     int bucket_range)
 {
     // Initialize the buckets on sorted array
-    sorted_array = calloc(number_of_ranges * bucket_size * amount_of_threads, sizeof(int));
-    int i = 0, j = 0, k = 0;
+    sorted_array = (int *)malloc(number_of_ranges * bucket_size * amount_of_threads * sizeof(int));
+    memset(sorted_array, 0, number_of_ranges * bucket_size * amount_of_threads * sizeof(int));
+    int th = 0, rg = 0, fl = 0, el = 0;
     double t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0;
-    int **bucket_fullness = calloc(amount_of_threads, sizeof(int *));
-    for (k = 0; k < amount_of_threads; k++)
-        bucket_fullness[k] = calloc(number_of_ranges, sizeof(int));
+    int **bucket_fullness = (int **)malloc(amount_of_threads * sizeof(int *));
+    for (th = 0; th < amount_of_threads; th++)
+    {
+        bucket_fullness[th] = (int *)malloc(number_of_ranges * sizeof(int));
+        memset(bucket_fullness[th], 0, number_of_ranges * sizeof(int));
+    }
     SCHEDULE_MAIN
     {
 
         /***************** ASSIGN  BUCKETS *****************/
         SCHEDULE_TIME(t0);
-        SCHEDULE_FOR(array_size)
-        for (k = 0; k < array_size; k++)
+        SCHEDULE_FOR(array_size, el)
         {
-            i = omp_get_thread_num();
-            j = array[k] / bucket_range;
-            BUCKET_TOP(i, j)
-            [0] = array[k];
-            bucket_fullness[i][j]++;
+            th = omp_get_thread_num();
+            rg = array[el] / bucket_range;
+            BUCKET_TOP(th, rg) = array[el];
+            BUCKET_FULLNESS(th, rg)++;
         }
         SCHEDULE_TIME(t1);
 
         /************* COLLAPSE THREAD BUCKETS *************/
         SCHEDULE_TIME(t2);
-        SCHEDULE_FOR(number_of_ranges)
-        for (j = 0; j < number_of_ranges; j++)
-            for (i = 1; i < amount_of_threads; i++)
-                for (k = 0; k < bucket_fullness[i][j]; k++)
+        SCHEDULE_FOR(number_of_ranges, rg)
+        {
+            for (th = 1; th < amount_of_threads; th++)
+                for (fl = 0; fl < BUCKET_FULLNESS(th, rg); fl++)
                 {
-                    BUCKET_TOP(0, j)
-                    [0] = BUCKET_BOTTOM(i, j)[k];
-                    bucket_fullness[0][j]++;
+                    BUCKET_TOP(0, rg) = BUCKET_VALUE(th, rg, fl);
+                    BUCKET_FULLNESS(0, rg)++;
                 }
+        }
         SCHEDULE_TIME(t3);
 
         // /**************** SORT BUCKETS TODO ****************/
         SCHEDULE_TIME(t4);
-        SCHEDULE_FOR(number_of_ranges)
-        for (j = 0; j < number_of_ranges; j++)
-            sortChunk(BUCKET_BOTTOM(0, j), bucket_fullness[0][j]);
+        SCHEDULE_FOR(number_of_ranges, rg)
+        {
+            sortChunk(BUCKET_POINTER(0, rg), BUCKET_FULLNESS(0, rg));
+        }
         SCHEDULE_TIME(t5);
 
         /************** COLLAPSE RESULT_ARRAY **************/
         SCHEDULE_TIME(t6);
         SCHEDULE_SINGLE
         {
-            for (i = 1; i < number_of_ranges; i++)
-                for (k = 0; k < bucket_fullness[0][i]; k++)
+            for (rg = 1; rg < number_of_ranges; rg++)
+                for (fl = 0; fl < BUCKET_FULLNESS(0, rg); fl++)
                 {
-                    BUCKET_TOP(0, 0)
-                    [0] = BUCKET_BOTTOM(0, i)[k];
-                    bucket_fullness[0][0]++;
+                    BUCKET_TOP(0, 0) = BUCKET_VALUE(0, rg, fl);
+                    BUCKET_FULLNESS(0, 0)++;
                 }
         }
         SCHEDULE_TIME(t7);
