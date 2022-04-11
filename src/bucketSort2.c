@@ -11,12 +11,13 @@ void bucketSort2(
     int *sorted_array,
     int bucket_size,
     int number_of_buckets,
-    int bucket_range)
+    int bucket_range,
+    double *time_results)
 {
     sorted_array = malloc(array_size * sizeof(int));
 
     int BASIC_CHUNK_SIZE = array_size / number_of_threads;
-    double timer, bucketing_time, sorting_time, merging_time;
+    double timer;
 
     int **buckets = malloc(number_of_buckets * sizeof(int *));
     int *bucket_indexes = malloc(number_of_buckets * sizeof(int));
@@ -45,7 +46,7 @@ void bucketSort2(
         #pragma omp barrier
         #pragma omp single 
         {
-            bucketing_time = omp_get_wtime() - timer;
+            time_results[0] = omp_get_wtime() - timer;
             timer = omp_get_wtime();
         }
         // SORT
@@ -56,7 +57,7 @@ void bucketSort2(
         #pragma omp barrier
         #pragma omp single 
         {
-            sorting_time = omp_get_wtime() - timer;
+            time_results[1] = omp_get_wtime() - timer;
             for(i = 0; i < number_of_buckets - 1; i++) {
                 bucket_indexes[i+1] += bucket_indexes[i];
             }
@@ -75,7 +76,7 @@ void bucketSort2(
         }
         #pragma omp single
         {
-            merging_time = omp_get_wtime() - timer;
+            time_results[2] = omp_get_wtime() - timer;
         }
 
     }
@@ -89,8 +90,8 @@ void bucketSort2(
     free(buckets);
     free(bucket_indexes);
     free(bucket_locks);
-    printf("\n\n");
-    printf("%e\n", bucketing_time);
-    printf("%e\n", sorting_time);
-    printf("%e\n", merging_time);
+    // printf("\n\n");
+    // printf("%e\n", time_results[0]);
+    // printf("%e\n", time_results[1]);
+    // printf("%e\n", time_results[2]);
 }

@@ -1,12 +1,28 @@
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #define min(a, b) (a > b ? b : a)
+
+const int REPEATS = 10;
+
+void print_average(double **array, int times_number) {
+    int i, j;
+    for(i = 1; i < REPEATS; i++) {
+        for(j = 0; j < times_number; j++) {
+            array[0][j] += array[i][j];
+        }
+    }
+    for(j = 0; j < times_number; j++) {
+        array[0][j] /= REPEATS;
+        printf("%e\n", array[0][j]);
+    }
+}
 
 void populate_array(int, int, int *, int, unsigned int);
 
 void bucketSort1(int, int, int *, int *, int, int, int);
-void bucketSort2(int, int, int *, int *, int, int, int);
+void bucketSort2(int, int, int *, int *, int, int, int, double *);
 void bucketSort3(int, int, int *, int *, int, int, int);
 
 int main(int argc, char **argv)
@@ -29,27 +45,40 @@ int main(int argc, char **argv)
         MAX_NUMBER = 10000;
         NUMBER_OF_RANGES = 10;
     }
-
     int BUCKET_RANGE = (MAX_NUMBER / NUMBER_OF_RANGES) + ((MAX_NUMBER % NUMBER_OF_RANGES) > 0 ? 1 : 0);
     int BUCKET_SIZE = min(ARRAY_SIZE, (ARRAY_SIZE / NUMBER_OF_RANGES) * 2);
     int *array, *sorted_array;
 
     array = malloc(ARRAY_SIZE * sizeof(int));
     populate_array(NUMBER_OF_THREADS, ARRAY_SIZE, array, MAX_NUMBER, 2137);
-    switch (variant)
-    {
-    case 1:
-        bucketSort1(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
-        break;
-    case 2:
-        bucketSort2(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
-        break;
-    case 3:
-        bucketSort3(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
-        break;
-    default:
-        printf("Wrong variant\n");
+
+    double **times = malloc(REPEATS*sizeof(double*));
+    int i, times_number;
+    for(i=0; i<REPEATS; i++) {
+        switch (variant)
+        {
+        case 1:
+            bucketSort1(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
+            break;
+        case 2:
+            times_number = 3;
+            times[i] = malloc(times_number*sizeof(double));
+            bucketSort2(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE, times[i]);
+            break;
+        case 3:
+            bucketSort3(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
+            break;
+        default:
+            printf("Wrong variant\n");
+        }
     }
+
+    print_average(times, times_number);
+
+    for(i = 0; i < REPEATS; i++){
+        free(times[i]);
+    }
+    free(times);
     free(array);
     free(sorted_array);
 

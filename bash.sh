@@ -1,13 +1,11 @@
 #!/bin/bash -l
 #SBATCH --nodes 1
 #SBATCH --ntasks 12
-#SBATCH --mem=1000M
-#SBATCH --time=00:29:99
+#SBATCH --mem=100M
+#SBATCH --time=00:59:59
 #SBATCH --partition=plgrid-testing
 #SBATCH --account=plgyaptide
 #SBATCH --output="output.out"
-
-# module add plgrid/tools/openmp
 
 SCRATCH_DIRECTORY=/net/scratch/people/${USER}/${SLURM_JOBID}
 mkdir -p ${SCRATCH_DIRECTORY}
@@ -30,11 +28,11 @@ do
     for (( t=1; t<=12; t++ ))
     do
         # number of ranges
-        for (( r=2; r<=2048; r*=2))
+        for (( r=2; r<=1024; r*=2))
         do
             echo "Variant: $v, Threads: $t, Ranges: $r"
             # ./main $v $t 5000 32767 $r
-            ./main $v $t 500000 524287 $r
+            ./main $v $t 250000 524287 $r
             echo
         done
     done
