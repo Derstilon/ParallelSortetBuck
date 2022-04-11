@@ -40,11 +40,7 @@ void bucketSort2(
 
     #pragma omp parallel num_threads(number_of_threads) default(shared)
     {
-
         timer = omp_get_wtime();
-        // BUCKETING
-        // #pragma omp for schedule(dynamic) private(i)
-        // for (i = omp_get_thread_num() * BASIC_CHUNK_SIZE; i < min(array_size, (omp_get_thread_num() + 1) * BASIC_CHUNK_SIZE); i++)
         #pragma omp for schedule(static, BASIC_CHUNK_SIZE) private(i)
         for(i = 0; i < array_size; i++) {
             int elem = array[i];
@@ -54,7 +50,9 @@ void bucketSort2(
             bucket_indexes[bucket_idx] = bucket_indexes[bucket_idx] + 1;
             omp_unset_lock(&(bucket_locks[bucket_idx]));
         }
-        #pragma omp single {
+        #pragma omp barrier
+        #pragma omp single 
+        {
             bucketing_time = omp_get_wtime() - timer;
             timer = omp_get_wtime();
         }
@@ -63,7 +61,9 @@ void bucketSort2(
         for(i = number_of_buckets - 1; i >= 0; i--) {
             sortChunk(buckets[i], bucket_indexes[i]);
         }
-        #pragma omp single {
+        #pragma omp barrier
+        #pragma omp single 
+        {
             sorting_time = omp_get_wtime() - timer;
             for(i = 0; i < number_of_buckets - 1; i++) {
                 bucket_indexes[i+1] += bucket_indexes[i];
@@ -76,12 +76,13 @@ void bucketSort2(
             int array_start_idx, array_end_idx;
             array_start_idx = i > 0 ? bucket_indexes[i-1] : 0;
             array_end_idx = bucket_indexes[i];
-            int k = 0;
+            int j, k = 0;
             for(j = array_start_idx; j <= array_end_idx; j++){
                 sorted_array[j] = buckets[i][k++];
             }
         }
-        #pragma omp single {
+        #pragma omp single
+        {
             bucketing_time = omp_get_wtime() - timer;
         }
 
@@ -96,4 +97,8 @@ void bucketSort2(
     free(buckets);
     free(bucket_indexes);
     free(bucket_locks);
+    printf("\n\n");
+    printf("%e\n", bucketing_time);
+    printf("%e\n", sorting_time);
+    printf("%e\n", merging_time);
 }
