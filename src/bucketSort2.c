@@ -16,15 +16,7 @@ void bucketSort2(
     sorted_array = malloc(array_size * sizeof(int));
 
     int BASIC_CHUNK_SIZE = array_size / number_of_threads;
-    // int *chunks_sizes = malloc(number_of_threads * sizeof(int));
     double timer, bucketing_time, sorting_time, merging_time;
-    // for (i = 0; i < number_of_threads; i++)
-    // {
-    //     chunks_sizes[i] = BASIC_CHUNK_SIZE;
-    // }
-    // chunks_sizes[number_of_threads - 1] = array_size % number_of_threads;
-    // int *table;
-    // table = malloc(array_size * sizeof(int));
 
     int **buckets = malloc(number_of_buckets * sizeof(int *));
     int *bucket_indexes = malloc(number_of_buckets * sizeof(int));
@@ -83,7 +75,7 @@ void bucketSort2(
         }
         #pragma omp single
         {
-            bucketing_time = omp_get_wtime() - timer;
+            merging_time = omp_get_wtime() - timer;
         }
 
     }
