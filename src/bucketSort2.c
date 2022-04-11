@@ -47,14 +47,10 @@ void bucketSort2(
         // for (i = omp_get_thread_num() * BASIC_CHUNK_SIZE; i < min(array_size, (omp_get_thread_num() + 1) * BASIC_CHUNK_SIZE); i++)
         #pragma omp for schedule(static, BASIC_CHUNK_SIZE) private(i)
         for(i = 0; i < array_size; i++) {
-            int element = array[i];
-            int bucket_idx = number_of_buckets - 1;
-            if (element / bucket_range <= number_of_buckets)
-            {
-                bucket_idx = element / bucket_range;
-            }
+            int elem = array[i];
+            int bucket_idx = elem / bucket_range <= number_of_buckets ? bucket_idx = elem / bucket_range : number_of_buckets - 1;
             omp_set_lock(&(bucket_locks[bucket_idx]));
-            buckets[bucket_idx][bucket_indexes[bucket_idx]] = element;
+            buckets[bucket_idx][bucket_indexes[bucket_idx]] = elem;
             bucket_indexes[bucket_idx] = bucket_indexes[bucket_idx] + 1;
             omp_unset_lock(&(bucket_locks[bucket_idx]));
         }
@@ -94,11 +90,10 @@ void bucketSort2(
 
     for (i = 0; i < number_of_buckets; i++)
     {
-        omp_destroy_lock(&(bucket_locks[i]))
-        for (j = 0; j < bucket_indexes[i]; j++)
-        {
-            printf(" %d ", buckets[i][j]);
-        }
-        printf("\n");
+        omp_destroy_lock(&(bucket_locks[i]));
+        free(buckets[i]);
     }
+    free(buckets);
+    free(bucket_indexes);
+    free(bucket_locks);
 }

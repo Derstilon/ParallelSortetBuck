@@ -3,7 +3,7 @@
 #SBATCH --ntasks 12
 #SBATCH --mem=1000M
 #SBATCH --time=00:29:99
-#SBATCH --partition=plgrid-short
+#SBATCH --partition=plgrid-testing
 #SBATCH --account=plgyaptide
 #SBATCH --output="output.out"
 
@@ -24,7 +24,7 @@ cp ${SLURM_SUBMIT_DIR}/src/bucketSort3.c ${SCRATCH_DIRECTORY}
 gcc -Wall main.c populate_array.c sortChunk.c bucketSort1.c bucketSort2.c bucketSort3.c -o main -fopenmp
 
 # sort variants
-for (( v=3; v<=3; v++ ))
+for (( v=2; v<=2; v++ ))
 do
     # number of threads
     for (( t=1; t<=12; t++ ))
