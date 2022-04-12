@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 void sortChunk(int *, int);
+void quickSortChunk(int *, int);
 
 void bucketSort2(
     int number_of_threads,
@@ -52,7 +53,7 @@ void bucketSort2(
         // SORT
         #pragma omp for schedule(dynamic) private(i)
         for(i = number_of_buckets - 1; i >= 0; i--) {
-            sortChunk(buckets[i], bucket_indexes[i]);
+            quickSortChunk(buckets[i], bucket_indexes[i]);
         }
         #pragma omp barrier
         #pragma omp single 
