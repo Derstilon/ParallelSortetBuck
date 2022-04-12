@@ -33,7 +33,7 @@
 #define SCHEDULE_MAIN \
     _Pragma("omp parallel num_threads(amount_of_threads) shared(bucket_fullness, sorted_array)")
 
-void sortChunk(int *, int);
+void quickSortChunk(int *, int);
 
 void bucketSort3(
     int amount_of_threads,
@@ -42,7 +42,8 @@ void bucketSort3(
     int *sorted_array,
     int bucket_size,
     int number_of_ranges,
-    int bucket_range)
+    int bucket_range,
+    double *times)
 {
     // Initialize the buckets on sorted array
     sorted_array = (int *)malloc(number_of_ranges * bucket_size * amount_of_threads * sizeof(int));
@@ -88,7 +89,7 @@ void bucketSort3(
         SCHEDULE_TIME(t4);
         SCHEDULE_FOR(number_of_ranges, rg)
         {
-            sortChunk(BUCKET_POINTER(0, rg), BUCKET_FULLNESS(0, rg));
+            quickSortChunk(BUCKET_POINTER(0, rg), BUCKET_FULLNESS(0, rg));
         }
         SCHEDULE_TIME(t5);
 
@@ -107,15 +108,19 @@ void bucketSort3(
         SCHEDULE_TIME(t7);
         SCHEDULE_SINGLE
         {
-            printf("\n");
             // printf("Czas przypisania wartości do kubelkow: %e \n", t1 - t0);
             // printf("Czas połączenia kubelkow:              %e \n", t3 - t2);
             // printf("Czas sortowania kubelkow:              %e \n", t5 - t4);
             // printf("Czas połączenia wynikow:               %e \n", t7 - t6);
-            printf("%e\n", t1 - t0);
-            printf("%e\n", t3 - t2);
-            printf("%e\n", t5 - t4);
-            printf("%e\n", t7 - t6);
+            // printf("Czas całkowity:                        %e \n", t7 - t0);
+            times[0] = t1 - t0;
+            times[1] = t3 - t2;
+            times[2] = t5 - t4;
+            times[3] = t7 - t6;
+            times[4] = t7 - t0;
         }
     }
+    for (th = 0; th < amount_of_threads; th++)
+        free(bucket_fullness[th]);
+    free(bucket_fullness);
 }
