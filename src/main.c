@@ -25,6 +25,7 @@ void print_average(double **array, int times_number)
 
 void populate_array(int, int, int *, int, unsigned int);
 
+void bucketSort1(int, int, int *, int *, int, int, int, double *);
 void bucketSort2(int, int, int *, int *, int, int, int, double *);
 void bucketSort3(int, int, int *, int *, int, int, int, double *);
 
@@ -61,6 +62,10 @@ int main(int argc, char **argv)
     {
         switch (variant)
         {
+        case 1:
+            times_number = 3;
+            times[i] = malloc(times_number*sizeof(double));
+            bucketSort1(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE, times[i]);
         case 2:
             times_number = 4;
             times[i] = malloc(times_number*sizeof(double));

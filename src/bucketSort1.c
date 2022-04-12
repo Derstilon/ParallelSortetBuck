@@ -4,7 +4,7 @@
 
 void sortChunk(int *, int);
 
-void bucketSort1(int number_of_threads, int array_size, int *array, int *sorted_array, int bucket_size, int number_of_buckets, int bucket_range)
+void bucketSort1(int number_of_threads, int array_size, int *array, int *sorted_array, int bucket_size, int number_of_buckets, int bucket_range, double *times)
 {
     sorted_array = malloc(number_of_buckets * bucket_size * sizeof(int));
     int i = 0, j = 0, k = 0;
@@ -59,26 +59,11 @@ void bucketSort1(int number_of_threads, int array_size, int *array, int *sorted_
         }
     }
     t3 = omp_get_wtime();
-    //     for (i = 0; i < array_size; i++)
-    //     {
-    //         printf("%d ", array[i]);
-    //     }
+    times[0] = t1 - t0;
+    times[1] = t2 - t1;
+    times[2] = t3 - t0;
+
     printf("Czas czas podziału na kubełki: %e \n", t1 - t0);
     printf("Czas sortowania kubełków: %e \n", t2 - t1);
     printf("Czas sortowania całej tablicy: %e \n", t3 - t0);
-}
-
-int main()
-{
-    int number_of_threads = 3;
-    int array_size = 15;
-    int array[15] = {14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-    int *sorted_array;
-    int bucket_size = 10;
-    int number_of_buckets = 3;
-    int bucket_range = 5;
-
-    bucketSort1(number_of_threads, array_size, array, sorted_array, bucket_size, number_of_buckets, bucket_range);
-
-    return 0;
 }
