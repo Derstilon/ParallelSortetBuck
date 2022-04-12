@@ -61,9 +61,11 @@ int main(int argc, char **argv)
             bucketSort1(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
             break;
         case 2:
-            times_number = 3;
+            times_number = 4;
             times[i] = malloc(times_number*sizeof(double));
+            double timer = omp_get_wtime();
             bucketSort2(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE, times[i]);
+            times[i][3] = omp_get_wtime() - timer;
             break;
         case 3:
             bucketSort3(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE);
