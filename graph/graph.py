@@ -28,11 +28,40 @@ while x:
     x = f.readline()
     
 print(labels)
-X = np.arange(1, 13, 1) 
-Y = data_rn[0]
+print(data_rn[0])
 
-plt.stackplot(X, Y.T, baseline="zero")
-plt.title('Bucket amount {0}'.format(2**1))
-plt.axis('tight')
-plt.legend(['Assign bucket', 'Merge buckets of the same range', 'Quick sort buckets', 'Merge results'])
+X = np.arange(1, 13, 1) 
+for i in range(0, 10):
+    plt.figure()
+    Y = data_rn[i]
+    plt.stackplot(X, Y.T, baseline="zero")
+    plt.title('Bucket amount {0}'.format(2**(i+1)))
+    plt.axis('tight')
+    plt.xlabel('Threads')
+    plt.ylabel('Time (s)')
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    plt.grid()
+    plt.xlim(1, 12)
+    
+    plt.legend(['Assign bucket', 'Merge buckets of the same range', 'Quick sort buckets', 'Merge results'])
+# plt.show()
+
+X = np.arange(1, 11, 1) 
+for i in range(0, 12):
+    plt.figure()
+    Y = data_th[i]
+    plt.stackplot(X, Y.T, baseline="zero")
+    plt.title('Thread amount {0}'.format(i+1))
+    plt.axis('tight')
+    plt.xlabel('Bucket amount 2^n')
+    plt.ylabel('Time (s)')
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    plt.grid()  
+    plt.xlim(1, 10)
+    
+    plt.legend(['Assign bucket', 'Merge buckets of the same range', 'Quick sort buckets', 'Merge results'])
 plt.show()
+
+
+    
+
