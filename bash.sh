@@ -7,17 +7,18 @@
 #SBATCH --account=plgyaptide
 #SBATCH --output="output.out"
 
-SCRATCH_DIRECTORY=/net/scratch/people/${USER}/${SLURM_JOBID}
-mkdir -p ${SCRATCH_DIRECTORY}
-cd ${SCRATCH_DIRECTORY}
+# SCRATCH_DIRECTORY=/home/students/k/o/konkol${USER}/${SLURM_JOBID}
+# mkdir -p ${SCRATCH_DIRECTORY}
+# cd ${SCRATCH_DIRECTORY}
+# SLURM_SUBMIT_DIR=/home/students/k/o/konkol/ParallelSortetBuck
 
-cp ${SLURM_SUBMIT_DIR}/src/main.c ${SCRATCH_DIRECTORY}
-cp ${SLURM_SUBMIT_DIR}/src/populate_array.c ${SCRATCH_DIRECTORY}
-cp ${SLURM_SUBMIT_DIR}/src/sortChunk.c ${SCRATCH_DIRECTORY}
-cp ${SLURM_SUBMIT_DIR}/src/bucketSort1.c ${SCRATCH_DIRECTORY}
-cp ${SLURM_SUBMIT_DIR}/src/bucketSort2.c ${SCRATCH_DIRECTORY}
-cp ${SLURM_SUBMIT_DIR}/src/bucketSort3.c ${SCRATCH_DIRECTORY}
-
+# cp ${SLURM_SUBMIT_DIR}/src/main.c ${SCRATCH_DIRECTORY}
+# cp ${SLURM_SUBMIT_DIR}/src/populate_array.c ${SCRATCH_DIRECTORY}
+# cp ${SLURM_SUBMIT_DIR}/src/sortChunk.c ${SCRATCH_DIRECTORY}
+# cp ${SLURM_SUBMIT_DIR}/src/bucketSort1.c ${SCRATCH_DIRECTORY}
+# cp ${SLURM_SUBMIT_DIR}/src/bucketSort2.c ${SCRATCH_DIRECTORY}
+# cp ${SLURM_SUBMIT_DIR}/src/bucketSort3.c ${SCRATCH_DIRECTORY}
+cd src
 
 gcc -Wall main.c populate_array.c sortChunk.c bucketSort2.c bucketSort3.c -o main -fopenmp
 
@@ -38,8 +39,8 @@ do
     done
 done
 
-cd ${SLURM_SUBMIT_DIR}
-rm -rf ${SCRATCH_DIRECTORY}
+# cd ${SLURM_SUBMIT_DIR}
+# rm -rf ${SCRATCH_DIRECTORY}
 
 # Finish the script
 exit 0
