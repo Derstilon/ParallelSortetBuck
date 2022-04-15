@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #SBATCH --nodes 1
 #SBATCH --ntasks 12
-#SBATCH --mem=1024M
+#SBATCH --mem=6GB
 #SBATCH --time=00:59:59
 #SBATCH --partition=plgrid-testing
 #SBATCH --account=plgyaptide
@@ -19,20 +19,20 @@ cp ${SLURM_SUBMIT_DIR}/src/bucketSort2.c ${SCRATCH_DIRECTORY}
 cp ${SLURM_SUBMIT_DIR}/src/bucketSort3.c ${SCRATCH_DIRECTORY}
 
 
-gcc -Wall main.c populate_array.c sortChunk.c bucketSort2.c bucketSort3.c -o main -fopenmp
+gcc -Wall main.c populate_array.c sortChunk.c bucketSort1.c bucketSort2.c bucketSort3.c -o main -fopenmp
 
 # sort variants
-for (( v=2; v<=3; v++ ))
+for (( v=3; v<=3; v++ ))
 do
     # number of threads
-    for (( t=1; t<=12; t++ ))
+    for (( t=1; t<=1; t++ ))
     do
         # number of ranges
-        for (( r=2; r<=1024; r*=2))
+        for (( r=100000; r<=100000; r*=2))
         do
             echo "Variant: $v, Threads: $t, Ranges: $r"
             # ./main $v $t 5000 32767 $r
-            ./main $v $t 2000000 1048576 $r
+            ./main $v $t 1000000 1000000 $r 2137
             echo
         done
     done

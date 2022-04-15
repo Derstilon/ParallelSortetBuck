@@ -3,11 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define max(a, b) (a > b ? a : b)
+#define min(a, b) (a > b ? b : a)
+
 #define BUCKET_FULLNESS(th, rg) \
     bucket_fullness[th][rg]
 
 #define BUCKET_POINTER(th, rg) \
-    (sorted_array + (th * number_of_ranges + rg) * bucket_size)
+    (sorted_array + (th * number_of_ranges + rg) * thread_bucket_size)
 
 #define BUCKET_VALUE(th, rg, offset) \
     (BUCKET_POINTER(th, rg)[offset])
@@ -33,21 +36,22 @@
 #define SCHEDULE_MAIN \
     _Pragma("omp parallel num_threads(amount_of_threads) shared(bucket_fullness, sorted_array)")
 
-void quickSortChunk(int *, int);
+void quickSortChunk(unsigned int *, int);
 
 void bucketSort3(
     int amount_of_threads,
     int array_size,
-    int *array,
-    int *sorted_array,
+    unsigned int *array,
+    unsigned int *sorted_array,
     int bucket_size,
     int number_of_ranges,
     int bucket_range,
     double *times)
 {
     // Initialize the buckets on sorted array
-    sorted_array = (int *)malloc(number_of_ranges * bucket_size * amount_of_threads * sizeof(int));
-    memset(sorted_array, 0, number_of_ranges * bucket_size * amount_of_threads * sizeof(int));
+    int thread_bucket_size = min(bucket_size, bucket_size * 8 / amount_of_threads);
+    sorted_array = (unsigned int *)malloc(number_of_ranges * thread_bucket_size * amount_of_threads * sizeof(unsigned int));
+    memset(sorted_array, 0, number_of_ranges * thread_bucket_size * amount_of_threads * sizeof(unsigned int));
     int th = 0, rg = 0, fl = 0, el = 0;
     double t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0;
     int **bucket_fullness = (int **)malloc(amount_of_threads * sizeof(int *));
@@ -73,15 +77,31 @@ void bucketSort3(
 
         /************* COLLAPSE THREAD BUCKETS *************/
         SCHEDULE_TIME(t2);
+        SCHEDULE_SINGLE
+        {
+            for (th = 0; th < amount_of_threads; th++)
+            {
+                for (rg = 0; rg < number_of_ranges; rg++)
+                {
+                    fl = BUCKET_FULLNESS(th, rg);
+                    if (fl > thread_bucket_size)
+                    {
+                        printf("Thread %d, range %d, fullness %d\n", th, rg, fl);
+                    }
+                }
+            }
+            printf("BUCKET SIZE: %d\n", thread_bucket_size);
+        }
         SCHEDULE_FOR(number_of_ranges, rg)
         {
             for (th = 1; th < amount_of_threads; th++)
-                for (fl = 0; fl < BUCKET_FULLNESS(th, rg); fl++)
-                {
-                    BUCKET_TOP(0, rg) = BUCKET_VALUE(th, rg, fl);
-                    BUCKET_FULLNESS(0, rg)
-                    ++;
-                }
+            {
+                memcpy(
+                    BUCKET_POINTER(0, rg) + BUCKET_FULLNESS(0, rg),
+                    BUCKET_POINTER(th, rg),
+                    BUCKET_FULLNESS(th, rg) * sizeof(unsigned int));
+                BUCKET_FULLNESS(0, rg) += BUCKET_FULLNESS(th, rg);
+            }
         }
         SCHEDULE_TIME(t3);
 
@@ -98,12 +118,13 @@ void bucketSort3(
         SCHEDULE_SINGLE
         {
             for (rg = 1; rg < number_of_ranges; rg++)
-                for (fl = 0; fl < BUCKET_FULLNESS(0, rg); fl++)
-                {
-                    BUCKET_TOP(0, 0) = BUCKET_VALUE(0, rg, fl);
-                    BUCKET_FULLNESS(0, 0)
-                    ++;
-                }
+            {
+                memcpy(
+                    BUCKET_POINTER(0, 0) + BUCKET_FULLNESS(0, 0),
+                    BUCKET_POINTER(0, rg),
+                    BUCKET_FULLNESS(0, rg) * sizeof(unsigned int));
+                BUCKET_FULLNESS(0, 0) += BUCKET_FULLNESS(0, rg);
+            }
         }
         SCHEDULE_TIME(t7);
         SCHEDULE_SINGLE

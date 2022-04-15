@@ -23,52 +23,58 @@ void print_average(double **array, int times_number)
     }
 }
 
-void populate_array(int, int, int *, int, unsigned int);
+void populate_array(int, int, unsigned int *, unsigned int, unsigned int);
 
-void bucketSort1(int, int, int *, int *, int, int, int, double *);
-void bucketSort2(int, int, int *, int *, int, int, int, double *);
-void bucketSort3(int, int, int *, int *, int, int, int, double *);
+void bucketSort1(int, int, unsigned int *, unsigned int *, int, int, int, double *);
+void bucketSort2(int, int, unsigned int *, unsigned int *, int, int, int, double *);
+void bucketSort3(int, int, unsigned int *, unsigned int *, int, int, int, double *);
 
 int main(int argc, char **argv)
 {
-    int variant, NUMBER_OF_THREADS, ARRAY_SIZE, MAX_NUMBER, NUMBER_OF_RANGES;
+    int VARIANT, NUMBER_OF_THREADS, ARRAY_SIZE, NUMBER_OF_RANGES, SEED, BUCKET_RANGE, BUCKET_SIZE;
+    unsigned int MAX_NUMBER;
+    unsigned int *array, *sorted_array;
+    double **times;
+    int i, times_number;
+    char *ptr;
 
-    if (argc > 5)
+    if (argc > 6)
     {
-        variant = atoi(argv[1]);
-        NUMBER_OF_THREADS = atoi(argv[2]);
-        ARRAY_SIZE = atoi(argv[3]);
-        MAX_NUMBER = atoi(argv[4]);
-        NUMBER_OF_RANGES = atoi(argv[5]);
+        VARIANT = strtol(argv[1], &ptr, 10);
+        NUMBER_OF_THREADS = strtol(argv[2], &ptr, 10);
+        ARRAY_SIZE = strtol(argv[3], &ptr, 10);
+        MAX_NUMBER = strtoul(argv[4], &ptr, 10);
+        NUMBER_OF_RANGES = strtol(argv[5], &ptr, 10);
+        SEED = strtol(argv[6], &ptr, 10);
+        printf("ARRAY_SIZE: %d\n", ARRAY_SIZE);
     }
     else
     {
-        variant = 2;
+        VARIANT = 2;
         NUMBER_OF_THREADS = 4;
         ARRAY_SIZE = 10000;
         MAX_NUMBER = 10000;
         NUMBER_OF_RANGES = 10;
+        SEED = 2137;
     }
-    int BUCKET_RANGE = (MAX_NUMBER / NUMBER_OF_RANGES) + ((MAX_NUMBER % NUMBER_OF_RANGES) > 0 ? 1 : 0);
-    int BUCKET_SIZE = min(ARRAY_SIZE, (ARRAY_SIZE / NUMBER_OF_RANGES) * 2);
-    int *array, *sorted_array;
+    BUCKET_RANGE = (MAX_NUMBER / NUMBER_OF_RANGES) + ((MAX_NUMBER % NUMBER_OF_RANGES) > 0 ? 1 : 0);
+    BUCKET_SIZE = min(ARRAY_SIZE, (ARRAY_SIZE / NUMBER_OF_RANGES) * 3);
 
-    array = malloc(ARRAY_SIZE * sizeof(int));
-    populate_array(NUMBER_OF_THREADS, ARRAY_SIZE, array, MAX_NUMBER, 2137);
+    times = malloc(REPEATS * sizeof(double *));
+    array = malloc(ARRAY_SIZE * sizeof(unsigned int));
+    populate_array(NUMBER_OF_THREADS, ARRAY_SIZE, array, MAX_NUMBER, SEED);
 
-    double **times = malloc(REPEATS * sizeof(double *));
-    int i, times_number;
     for (i = 0; i < REPEATS; i++)
     {
-        switch (variant)
+        switch (VARIANT)
         {
         case 1:
             times_number = 3;
-            times[i] = malloc(times_number*sizeof(double));
+            times[i] = malloc(times_number * sizeof(double));
             bucketSort1(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE, times[i]);
         case 2:
             times_number = 4;
-            times[i] = malloc(times_number*sizeof(double));
+            times[i] = malloc(times_number * sizeof(double));
             double timer = omp_get_wtime();
             bucketSort2(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE, times[i]);
             times[i][3] = omp_get_wtime() - timer;
@@ -80,6 +86,7 @@ int main(int argc, char **argv)
             break;
         default:
             printf("Wrong variant\n");
+            return 0;
         }
         free(sorted_array);
     }

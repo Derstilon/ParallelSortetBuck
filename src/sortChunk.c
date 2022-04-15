@@ -1,7 +1,12 @@
-#define SWAP(i,j) {int tmp = chunk[i]; chunk[i] = chunk[j]; chunk[j] = tmp;}
+#define SWAP(i, j)           \
+    {                        \
+        int tmp = chunk[i];  \
+        chunk[i] = chunk[j]; \
+        chunk[j] = tmp;      \
+    }
 
 void sortChunk(
-    int *chunk,
+    unsigned int *chunk,
     int chunk_size)
 {
     int i, j;
@@ -11,7 +16,7 @@ void sortChunk(
 }
 
 void quickSortChunk(
-    int *chunk,
+    unsigned int *chunk,
     int chunk_size)
 {
     int i, j, pivot;
@@ -30,4 +35,16 @@ void quickSortChunk(
     }
     quickSortChunk(chunk, i);
     quickSortChunk(chunk + i, chunk_size - i);
+}
+
+void insertSortChunk(
+    unsigned int *chunk,
+    int chunk_size)
+{
+    int i, j;
+    for (i = 1; i < chunk_size; i++)
+    {
+        for (j = i; j > 0 && chunk[j] < chunk[j - 1]; j--)
+            SWAP(j, j - 1);
+    }
 }
