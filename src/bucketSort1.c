@@ -4,9 +4,16 @@
 
 void sortChunk(int *, int);
 
-void bucketSort1(int number_of_threads, int array_size, int *array, int *sorted_array, int bucket_size, int number_of_buckets, int bucket_range, double *times)
+void bucketSort1(
+    int number_of_threads,
+    int array_size,
+    unsigned int *array,
+    unsigned int *sorted_array,
+    int bucket_size,
+    int number_of_buckets,
+    int bucket_range,
+    double *times)
 {
-    sorted_array = malloc(number_of_buckets * bucket_size * sizeof(int));
     int i = 0, j = 0, k = 0;
     double t0 = 0, t1 = 0, t2 = 0, t3 = 0;
     int buckets_per_thread = number_of_buckets / number_of_threads;

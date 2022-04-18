@@ -21,14 +21,14 @@
 #define STRINGIFY(x) #x
 
 #define SCHEDULE_FOR_PRAGMA(block) \
-    _Pragma(STRINGIFY(omp for schedule(dynamic, block) private(el, th, rg, fl)))
+    _Pragma(STRINGIFY(omp for schedule(dynamic, block) private(el, th, rg)))
 
 #define SCHEDULE_FOR(var, iterator)                                                        \
     SCHEDULE_FOR_PRAGMA(var / amount_of_threads + ((var % amount_of_threads) > 0 ? 1 : 0)) \
     for (iterator = 0; iterator < var; iterator++)
 
 #define SCHEDULE_SINGLE \
-    _Pragma("omp single private(el, th, rg, fl)")
+    _Pragma("omp single private(el, th, rg)")
 
 #define SCHEDULE_TIME(tx) \
     SCHEDULE_SINGLE { tx = omp_get_wtime(); }
@@ -50,9 +50,7 @@ void bucketSort3(
 {
     // Initialize the buckets on sorted array
     int thread_bucket_size = min(bucket_size, bucket_size * 8 / amount_of_threads);
-    sorted_array = (unsigned int *)malloc(number_of_ranges * thread_bucket_size * amount_of_threads * sizeof(unsigned int));
-    memset(sorted_array, 0, number_of_ranges * thread_bucket_size * amount_of_threads * sizeof(unsigned int));
-    int th = 0, rg = 0, fl = 0, el = 0;
+    int th = 0, rg = 0, el = 0;
     double t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0;
     int **bucket_fullness = (int **)malloc(amount_of_threads * sizeof(int *));
     for (th = 0; th < amount_of_threads; th++)
@@ -77,21 +75,6 @@ void bucketSort3(
 
         /************* COLLAPSE THREAD BUCKETS *************/
         SCHEDULE_TIME(t2);
-        SCHEDULE_SINGLE
-        {
-            for (th = 0; th < amount_of_threads; th++)
-            {
-                for (rg = 0; rg < number_of_ranges; rg++)
-                {
-                    fl = BUCKET_FULLNESS(th, rg);
-                    if (fl > thread_bucket_size)
-                    {
-                        printf("Thread %d, range %d, fullness %d\n", th, rg, fl);
-                    }
-                }
-            }
-            printf("BUCKET SIZE: %d\n", thread_bucket_size);
-        }
         SCHEDULE_FOR(number_of_ranges, rg)
         {
             for (th = 1; th < amount_of_threads; th++)
@@ -105,7 +88,7 @@ void bucketSort3(
         }
         SCHEDULE_TIME(t3);
 
-        // /**************** SORT BUCKETS TODO ****************/
+        /****************** SORT  BUCKETS ******************/
         SCHEDULE_TIME(t4);
         SCHEDULE_FOR(number_of_ranges, rg)
         {

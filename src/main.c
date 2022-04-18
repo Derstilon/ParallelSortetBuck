@@ -4,7 +4,7 @@
 
 #define min(a, b) (a > b ? b : a)
 
-const int REPEATS = 10;
+const int REPEATS = 50;
 
 void print_average(double **array, int times_number)
 {
@@ -37,8 +37,7 @@ int main(int argc, char **argv)
     double **times;
     int i, times_number;
     char *ptr;
-
-    if (argc > 6)
+    if (argc >= 6)
     {
         VARIANT = strtol(argv[1], &ptr, 10);
         NUMBER_OF_THREADS = strtol(argv[2], &ptr, 10);
@@ -46,7 +45,6 @@ int main(int argc, char **argv)
         MAX_NUMBER = strtoul(argv[4], &ptr, 10);
         NUMBER_OF_RANGES = strtol(argv[5], &ptr, 10);
         SEED = strtol(argv[6], &ptr, 10);
-        printf("ARRAY_SIZE: %d\n", ARRAY_SIZE);
     }
     else
     {
@@ -58,12 +56,24 @@ int main(int argc, char **argv)
         SEED = 2137;
     }
     BUCKET_RANGE = (MAX_NUMBER / NUMBER_OF_RANGES) + ((MAX_NUMBER % NUMBER_OF_RANGES) > 0 ? 1 : 0);
-    BUCKET_SIZE = min(ARRAY_SIZE, (ARRAY_SIZE / NUMBER_OF_RANGES) * 3);
+    BUCKET_SIZE = min(ARRAY_SIZE, (ARRAY_SIZE / NUMBER_OF_RANGES) * 3 / 2);
 
     times = malloc(REPEATS * sizeof(double *));
     array = malloc(ARRAY_SIZE * sizeof(unsigned int));
     populate_array(NUMBER_OF_THREADS, ARRAY_SIZE, array, MAX_NUMBER, SEED);
 
+    switch (VARIANT)
+    {
+    case 1:
+        sorted_array = malloc(NUMBER_OF_RANGES * BUCKET_SIZE * sizeof(unsigned int));
+        break;
+    case 2:
+        sorted_array = malloc(ARRAY_SIZE * sizeof(unsigned int));
+        break;
+    case 3:
+        sorted_array = (unsigned int *)malloc(NUMBER_OF_RANGES * min(BUCKET_SIZE, BUCKET_SIZE * 8 / NUMBER_OF_THREADS) * NUMBER_OF_THREADS * sizeof(unsigned int));
+        break;
+    }
     for (i = 0; i < REPEATS; i++)
     {
         switch (VARIANT)
@@ -72,6 +82,7 @@ int main(int argc, char **argv)
             times_number = 3;
             times[i] = malloc(times_number * sizeof(double));
             bucketSort1(NUMBER_OF_THREADS, ARRAY_SIZE, array, sorted_array, BUCKET_SIZE, NUMBER_OF_RANGES, BUCKET_RANGE, times[i]);
+            break;
         case 2:
             times_number = 4;
             times[i] = malloc(times_number * sizeof(double));
@@ -88,7 +99,6 @@ int main(int argc, char **argv)
             printf("Wrong variant\n");
             return 0;
         }
-        free(sorted_array);
     }
 
     print_average(times, times_number);
