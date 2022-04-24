@@ -19,11 +19,11 @@ cp ${SLURM_SUBMIT_DIR}/src/bucketSort2.c ${SCRATCH_DIRECTORY}
 cp ${SLURM_SUBMIT_DIR}/src/bucketSort3.c ${SCRATCH_DIRECTORY}
 
 
-gcc -Wall main.c populate_array.c sortChunk.c bucketSort1.c bucketSort2.c bucketSort3.c -o main -fopenmp
+gcc -Wall main.c populate_array.c sortChunk.c bucketSort2.c bucketSort3.c -o main -fopenmp
 problem_size=$((111000000))
 seed=$((2137))
 # sort variants
-for (( v=3; v<=3; v++ ))
+for (( v=2; v<=2; v++ ))
 do
     # number of threads
     for (( t=12; t<=12; t++ ))
