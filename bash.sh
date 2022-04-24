@@ -40,7 +40,7 @@ do
         done
         for (( r=2; r<=10000; r*=2))
         do
-            test_bucket_size=$(echo "$bucket_size/$r" | bc -l | cut -d. -f1 )
+            test_bucket_size=$(echo "$bucket_size*$r" | bc -l | cut -d. -f1 )
             echo "Variant: $v, Threads: $t, Ranges: $test_bucket_size"
             ./main $v $t $problem_size $problem_size $test_bucket_size $seed
             echo
